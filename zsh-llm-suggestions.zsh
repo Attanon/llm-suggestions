@@ -73,7 +73,7 @@ zsh_llm_completion() {
     echo ""
     zle reset-prompt
   elif [[ "$mode" == "script" ]]; then
-    # Get the path of the generated script
+    # The result_file now contains the actual path of the generated script
     local script_path=$(cat $result_file)
     # Replace the current buffer with the path of the generated script
     BUFFER="$script_path"
