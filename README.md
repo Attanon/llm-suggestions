@@ -22,7 +22,7 @@ to explain the command.
 
 2. Clone the repository:
    ```
-   git clone https://github.com/stefanheule/zsh-llm-suggestions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-llm-suggestions
+   git clone https://gitlab.apertia.cz/dstrejc/zsh-groq-llm.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-llm-suggestions
    ```
 
 3. Make sure `python3` is installed.
