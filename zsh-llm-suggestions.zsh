@@ -67,10 +67,14 @@ zsh_llm_completion() {
     ZSH_LLM_SUGGESTIONS_LAST_RESULT=$(cat $result_file)
     BUFFER="${ZSH_LLM_SUGGESTIONS_LAST_RESULT}"
     CURSOR=${#ZSH_LLM_SUGGESTIONS_LAST_RESULT}
-  fi
-  if [[ "$mode" == "explain" ]]; then
+  elif [[ "$mode" == "explain" ]]; then
     echo ""
     eval "cat $result_file"
+    echo ""
+    zle reset-prompt
+  elif [[ "$mode" == "script" ]]; then
+    echo ""
+    echo "Shell script generated and saved to: $(cat $result_file)"
     echo ""
     zle reset-prompt
   fi
@@ -80,6 +84,10 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "$0" )" &> /dev/null && pwd )
 
 zsh_llm_suggestions_groq() {
   zsh_llm_completion "$SCRIPT_DIR/zsh-llm-suggestions-groq.py" "generate"
+}
+
+zsh_llm_suggestions_groq_script() {
+  zsh_llm_completion "$SCRIPT_DIR/zsh-llm-suggestions-groq.py" "script"
 }
 
 zsh_llm_suggestions_anthropic() {
@@ -100,3 +108,4 @@ zsh_llm_suggestions_github_copilot_explain() {
 
 #zle -N zsh_llm_suggestions_anthropic
 zle -N zsh_llm_suggestions_groq
+zle -N zsh_llm_suggestions_groq_script
