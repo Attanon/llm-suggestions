@@ -3,6 +3,7 @@ import sys
 import os
 import platform
 import groq
+import tempfile
 
 MISSING_PREREQUISITES = "zsh-llm-suggestions missing prerequisites:"
 
@@ -26,9 +27,37 @@ def highlight_explanation(explanation):
     except ImportError:
         return explanation
 
+def generate_shell_script(client, buffer, os_info):
+    system_message = f"""You are a zsh shell expert on {os_info}. Please write a complete shell script that solves the given problem.
+                         The script should be fully functional and ready to run. Include appropriate shebang, comments, and error handling.
+                         Ensure the script is compatible with {os_info}. If the script typically requires a password (like mysql),
+                         assume the user has appropriate authentication set up and do not include password prompts."""
+
+    response = client.chat.completions.create(
+        model="llama3-70b-8192",
+        messages=[
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": buffer}
+        ],
+        max_tokens=2000,
+        temperature=0.2
+    )
+
+    script_content = response.choices[0].message.content.strip()
+    
+    # Create a temporary file with a .sh extension
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False, dir='/tmp') as temp_file:
+        temp_file.write(script_content)
+        temp_file_path = temp_file.name
+
+    # Make the script executable
+    os.chmod(temp_file_path, 0o755)
+
+    return temp_file_path
+
 def main():
     mode = sys.argv[1]
-    if mode not in ['generate', 'explain']:
+    if mode not in ['generate', 'explain', 'script']:
         print(f"ERROR: something went wrong in zsh-llm-suggestions, please report a bug. Got unknown mode: {mode}")
         return
 
@@ -42,6 +71,12 @@ def main():
     buffer = sys.stdin.read()
 
     os_info = get_os_info()
+    
+    if mode == 'script':
+        script_path = generate_shell_script(client, buffer, os_info)
+        print(f"Shell script generated and saved to: {script_path}")
+        return
+
     system_message = f"""You are a zsh shell expert on {os_info}, please write a ZSH command that solves my problem.
                          Only output the completed command, never include any explanation. Ensure the command is compatible with {os_info}.
                          Important: If the command typically requires a password (like mysql), do not include any password or username prompts or requests in the command. Assume the user has appropriate authentication set up."""
