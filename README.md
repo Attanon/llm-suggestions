@@ -25,73 +25,89 @@ Source the script and configure the hotkey in `.zshrc`:
 
 ```
 source ~/zsh/zsh-llm-suggestions/zsh-llm-suggestions.zsh
-bindkey '^o' zsh_llm_suggestions_openai # Ctrl + O to have OpenAI suggest a command given a English description
+bindkey '^o' zsh_llm_suggestions_openai # Ctrl + O to have OpenAI suggest a command
 bindkey '^[^o' zsh_llm_suggestions_openai_explain # Ctrl + alt + O to have OpenAI explain a command
-bindkey '^p' zsh_llm_suggestions_github_copilot # Ctrl + P to have GitHub Copilot suggest a command given a English description
+bindkey '^p' zsh_llm_suggestions_github_copilot # Ctrl + P to have GitHub Copilot suggest a command
 bindkey '^[^p' zsh_llm_suggestions_github_copilot_explain # Ctrl + alt + P to have GitHub Copilot explain a command
+bindkey '^a' zsh_llm_suggestions_anthropic # Ctrl + A to have Anthropic suggest a command
+bindkey '^[^a' zsh_llm_suggestions_anthropic_explain # Ctrl + alt + A to have Anthropic explain a command
+bindkey '^g' zsh_llm_suggestions_groq # Ctrl + G to have Groq suggest a command
+bindkey '^[^g' zsh_llm_suggestions_groq_explain # Ctrl + alt + G to have Groq explain a command
 ```
 
-Make sure `python3` is installed.
+3. Make sure `python3` is installed.
 
-Both LLMs require a bit of configuration. Either follow the rest of the instructions
-here, or just enter something on the prompt (because an empty prompt won't run the
-LLM) and hit your configured keyboard shortcut. Instead of answering the prompt, it will
-tell you how to finish the setup.
+4. Install required Python packages:
 
-For `zsh_llm_suggestions_openai` (OpenAI-based suggestions):
-- Set the `OPENAI_API_KEY` environment variable to your API key. You can get it
-  from [https://platform.openai.com/api-keys](platform.openai.com/api-keys). Note
-  that every suggestion costs a small amount of money, you are solely responsible for
-  these charges.
+```
+pip3 install openai anthropic groq pygments
+```
+
+5. Configure the LLMs:
+
+For OpenAI:
+- Set the `OPENAI_API_KEY` environment variable:
   ```
-  export OPENAI_API_KEY="..."
-  ```
-- Install the Python 3 package `openai`:
-  ```
-  pip3 install openai
-  ```
-- Optional, if you want syntax highlighting for the command explanation, install pygments
-  ```
-  pip3 install pygments
+  export OPENAI_API_KEY="your_api_key_here"
   ```
 
-For `zsh_llm_suggestions_github_copilot` (GitHub Copilot suggestions):
-- Install GitHub CLI: Follow [https://github.com/cli/cli#installation](github.com/cli/cli#installation).
+For GitHub Copilot:
+- Install GitHub CLI: Follow [https://github.com/cli/cli#installation](https://github.com/cli/cli#installation)
 - Authenticate with GitHub:
   ```
-  /usr/bin/gh auth login --web -h github.com
+  gh auth login --web -h github.com
   ```
 - Install GitHub Copilot extension:
   ```
-  /usr/bin/gh extension install github/gh-copilot
+  gh extension install github/gh-copilot
+  ```
+
+For Anthropic:
+- Set the `ANTHROPIC_API_KEY` environment variable:
+  ```
+  export ANTHROPIC_API_KEY="your_api_key_here"
+  ```
+
+For Groq:
+- Set the `GROQ_API_KEY` environment variable:
+  ```
+  export GROQ_API_KEY="your_api_key_here"
   ```
 
 ## Usage
 
 ### LLM suggested commands
 
-Type out what you'd like to do in English, then hit ctrl+P or ctrl+O (or whatever hotkey)
-you configured. `zsh-llm-suggestions` will then query OpenAI or GitHub Copilot, and replace
-the query with the command suggested.
+Type out what you'd like to do in English, then hit the corresponding hotkey:
+- Ctrl+O for OpenAI
+- Ctrl+P for GitHub Copilot
+- Ctrl+A for Anthropic
+- Ctrl+G for Groq
 
-If you don't like the suggestion and think the LLM can do better, just hit ctrl+P/O again,
-and a new suggestion will be fetched.
+The LLM will replace your query with the suggested command.
+
+If you don't like the suggestion, hit the hotkey again for a new suggestion.
 
 ### Explain commands using LLM
 
-If you typed a command (or maybe the LLM generated one) that you don't understand, hit
-ctrl+alt+O to have OpenAI explain the command in English, or hit ctrl+alt+P to have
-GitHub Copilot explain it.
+To have an LLM explain a command:
+- Ctrl+Alt+O for OpenAI
+- Ctrl+Alt+P for GitHub Copilot
+- Ctrl+Alt+A for Anthropic
+- Ctrl+Alt+G for Groq
 
 ## Warning
 
 There are some risks using `zsh-llm-suggestions`:
-1. LLMs can suggest bad commands, it is up to you to make sure you
-   are okay executing the commands.
-2. The supported LLMs are not free, so you might incur a cost when using `zsh-llm-suggestions`.
+1. LLMs can suggest incorrect or potentially harmful commands. Always review and understand the suggested commands before executing them.
+2. Using LLMs may incur costs. You are responsible for any charges associated with API usage.
 
 ## Supported LLMs
 
-Right now, two LLMs are supported:
-1. GitHub Copilot (via GitHub CLI). Requires a GitHub Copilot subscription.
-2. OpenAI. Requires an OpenAI API key. Currently uses `gpt-4-1106-preview`.
+The following LLMs are supported:
+1. OpenAI (requires an API key)
+2. GitHub Copilot (requires a GitHub Copilot subscription)
+3. Anthropic (requires an API key)
+4. Groq (requires an API key)
+
+Each LLM has its own strengths and may provide different suggestions or explanations.
