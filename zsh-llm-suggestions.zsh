@@ -79,7 +79,6 @@ zsh_llm_completion() {
     echo ""
     echo "Shell script generated and saved to: $BUFFER"
     echo ""
-    zle reset-prompt
   fi
 }
 
