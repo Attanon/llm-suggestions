@@ -43,11 +43,11 @@ def main():
 
     os_info = get_os_info()
     system_message = f"""You are a zsh shell expert on {os_info}, please write a ZSH command that solves my problem.
-You should only output the completed command, no need to include any other explanation. Ensure the command is compatible with {os_info}.
-Important: If the command typically requires a password (like mysql), do not include any password or username prompts or requests in the command. Assume the user has appropriate authentication set up."""
+                         Only output the completed command, never include any explanation. Ensure the command is compatible with {os_info}.
+                         Important: If the command typically requires a password (like mysql), do not include any password or username prompts or requests in the command. Assume the user has appropriate authentication set up."""
     if mode == 'explain':
         system_message = f"""You are a zsh shell expert on {os_info}, please briefly explain how the given command works. Be as concise as possible. Use Markdown syntax for formatting. If there are any {os_info}-specific considerations, mention them.
-If the command typically requires a password (like mysql), explain how it's assumed to work without explicitly requesting a password."""
+                             If the command typically requires a password (like mysql), explain how it's assumed to work without explicitly requesting a password."""
 
     response = client.chat.completions.create(
         model="llama3-70b-8192",
