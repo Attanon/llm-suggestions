@@ -73,8 +73,11 @@ zsh_llm_completion() {
     echo ""
     zle reset-prompt
   elif [[ "$mode" == "script" ]]; then
+    # Replace the current buffer with the path of the generated script
+    BUFFER="$(cat $result_file)"
+    CURSOR=${#BUFFER}
     echo ""
-    echo "Shell script generated and saved to: $(cat $result_file)"
+    echo "Shell script generated and saved to: $BUFFER"
     echo ""
     zle reset-prompt
   fi
