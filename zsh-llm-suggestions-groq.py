@@ -53,11 +53,7 @@ def generate_shell_script(client, buffer, os_info):
     # Make the script executable
     os.chmod(temp_file_path, 0o755)
 
-    # Read and return the script content
-    with open(temp_file_path, 'r') as file:
-        script_content = file.read()
-
-    return temp_file_path, script_content
+    return temp_file_path
 
 def main():
     mode = sys.argv[1]
@@ -77,11 +73,9 @@ def main():
     os_info = get_os_info()
     
     if mode == 'script':
-        script_path, script_content = generate_shell_script(client, buffer, os_info)
-        print("Generated shell script:")
-        print(script_content)
-        print(f"\nScript saved to: {script_path}")
-        print(f"\nTo run the script, use: {script_path}")
+        script_path = generate_shell_script(client, buffer, os_info)
+        modified_command = f"awk '{{print \"{script_path}\"}}'"
+        print(modified_command)
         return
 
     system_message = f"""You are a zsh shell expert on {os_info}, please write a ZSH command that solves my problem.
