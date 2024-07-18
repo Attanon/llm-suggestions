@@ -15,64 +15,77 @@ to explain the command.
 
 ## Installation
 
-Clone the repository:
+1. Install Oh My Zsh (if not already installed):
+   ```
+   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+   ```
 
-```
-git clone https://github.com/stefanheule/zsh-llm-suggestions.git ~/zsh/zsh-llm-suggestions
-```
-
-Source the script and configure the hotkey in `.zshrc`:
-
-```
-source ~/zsh/zsh-llm-suggestions/zsh-llm-suggestions.zsh
-bindkey '^o' zsh_llm_suggestions_openai # Ctrl + O to have OpenAI suggest a command
-bindkey '^[^o' zsh_llm_suggestions_openai_explain # Ctrl + alt + O to have OpenAI explain a command
-bindkey '^p' zsh_llm_suggestions_github_copilot # Ctrl + P to have GitHub Copilot suggest a command
-bindkey '^[^p' zsh_llm_suggestions_github_copilot_explain # Ctrl + alt + P to have GitHub Copilot explain a command
-bindkey '^a' zsh_llm_suggestions_anthropic # Ctrl + A to have Anthropic suggest a command
-bindkey '^[^a' zsh_llm_suggestions_anthropic_explain # Ctrl + alt + A to have Anthropic explain a command
-bindkey '^g' zsh_llm_suggestions_groq # Ctrl + G to have Groq suggest a command
-bindkey '^[^g' zsh_llm_suggestions_groq_explain # Ctrl + alt + G to have Groq explain a command
-```
+2. Clone the repository:
+   ```
+   git clone https://github.com/stefanheule/zsh-llm-suggestions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-llm-suggestions
+   ```
 
 3. Make sure `python3` is installed.
 
 4. Install required Python packages:
-
-```
-pip3 install openai anthropic groq pygments
-```
+   ```
+   pip3 install openai anthropic groq pygments
+   ```
 
 5. Configure the LLMs:
 
-For OpenAI:
-- Set the `OPENAI_API_KEY` environment variable:
-  ```
-  export OPENAI_API_KEY="your_api_key_here"
-  ```
+   For OpenAI:
+   - Obtain an API key from [OpenAI](https://platform.openai.com/account/api-keys)
+   - Add to your `.zshrc`:
+     ```
+     export OPENAI_API_KEY="your_openai_api_key_here"
+     ```
 
-For GitHub Copilot:
-- Install GitHub CLI: Follow [https://github.com/cli/cli#installation](https://github.com/cli/cli#installation)
-- Authenticate with GitHub:
-  ```
-  gh auth login --web -h github.com
-  ```
-- Install GitHub Copilot extension:
-  ```
-  gh extension install github/gh-copilot
-  ```
+   For GitHub Copilot:
+   - Install GitHub CLI: Follow [https://github.com/cli/cli#installation](https://github.com/cli/cli#installation)
+   - Authenticate with GitHub:
+     ```
+     gh auth login --web -h github.com
+     ```
+   - Install GitHub Copilot extension:
+     ```
+     gh extension install github/gh-copilot
+     ```
 
-For Anthropic:
-- Set the `ANTHROPIC_API_KEY` environment variable:
-  ```
-  export ANTHROPIC_API_KEY="your_api_key_here"
-  ```
+   For Anthropic:
+   - Obtain an API key from [Anthropic](https://www.anthropic.com/)
+   - Add to your `.zshrc`:
+     ```
+     export ANTHROPIC_API_KEY="your_anthropic_api_key_here"
+     ```
 
-For Groq:
-- Set the `GROQ_API_KEY` environment variable:
-  ```
-  export GROQ_API_KEY="your_api_key_here"
-  ```
+   For Groq:
+   - Sign up for an account at [Groq](https://console.groq.com/)
+   - Obtain an API key from your Groq dashboard
+   - Add to your `.zshrc`:
+     ```
+     export GROQ_API_KEY="your_groq_api_key_here"
+     ```
+
+6. Add the plugin to your Oh My Zsh configuration:
+   Open your `.zshrc` file and add `zsh-llm-suggestions` to the plugins list:
+   ```
+   plugins=(... zsh-llm-suggestions)
+   ```
+
+7. Configure hotkeys in your `.zshrc`:
+   ```
+   bindkey '^o' zsh_llm_suggestions_openai # Ctrl + O to have OpenAI suggest a command
+   bindkey '^[^o' zsh_llm_suggestions_openai_explain # Ctrl + alt + O to have OpenAI explain a command
+   bindkey '^p' zsh_llm_suggestions_github_copilot # Ctrl + P to have GitHub Copilot suggest a command
+   bindkey '^[^p' zsh_llm_suggestions_github_copilot_explain # Ctrl + alt + P to have GitHub Copilot explain a command
+   bindkey '^a' zsh_llm_suggestions_anthropic # Ctrl + A to have Anthropic suggest a command
+   bindkey '^[^a' zsh_llm_suggestions_anthropic_explain # Ctrl + alt + A to have Anthropic explain a command
+   bindkey '^g' zsh_llm_suggestions_groq # Ctrl + G to have Groq suggest a command
+   bindkey '^[^g' zsh_llm_suggestions_groq_explain # Ctrl + alt + G to have Groq explain a command
+   ```
+
+8. Restart your terminal or run `source ~/.zshrc` to apply the changes.
 
 ## Usage
 
