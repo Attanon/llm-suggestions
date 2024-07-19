@@ -61,9 +61,7 @@ zsh_llm_completion() {
   zsh_llm_suggestions_spinner $pid
   
   if [[ "$mode" == "generate" ]]; then
-    # Place the query in the history first
     print -s $query
-    # Replace the current buffer with the result
     ZSH_LLM_SUGGESTIONS_LAST_RESULT=$(cat $result_file)
     BUFFER="${ZSH_LLM_SUGGESTIONS_LAST_RESULT}"
     CURSOR=${#ZSH_LLM_SUGGESTIONS_LAST_RESULT}
@@ -73,9 +71,6 @@ zsh_llm_completion() {
     echo ""
     zle reset-prompt
   elif [[ "$mode" == "script" ]]; then
-    # The result_file now contains the actual path of the generated script
-    local script_path=$(cat $result_file)
-    # Replace the current buffer with the path of the generated script
     BUFFER="$script_path"
     CURSOR=${#BUFFER}
     zle reset-prompt
