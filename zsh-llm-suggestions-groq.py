@@ -75,7 +75,7 @@ def main():
     if mode == 'script':
         script_path = generate_shell_script(client, buffer, os_info)
         print(script_path)
-        return script_path
+        return
 
     system_message = f"""You are a zsh shell expert on {os_info}, please write a ZSH command that solves my problem.
                          Only output the completed command, never include any explanation. Ensure the command is compatible with {os_info}.

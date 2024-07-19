@@ -76,6 +76,7 @@ zsh_llm_completion() {
     CURSOR=${#BUFFER}
     zle reset-prompt
     echo "\nShell script generated and saved to: $script_path"
+    echo "To execute the script, run: source $script_path"
   fi
 }
 
