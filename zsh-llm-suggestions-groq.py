@@ -74,9 +74,8 @@ def main():
     
     if mode == 'script':
         script_path = generate_shell_script(client, buffer, os_info)
-        modified_command = f"awk '{{print \"{script_path}\"}}'"
-        print(modified_command)
-        return
+        print(script_path)
+        return script_path
 
     system_message = f"""You are a zsh shell expert on {os_info}, please write a ZSH command that solves my problem.
                          Only output the completed command, never include any explanation. Ensure the command is compatible with {os_info}.
