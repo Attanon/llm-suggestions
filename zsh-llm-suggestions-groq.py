@@ -45,12 +45,12 @@ def generate_shell_script(client, buffer, os_info):
 
     script_content = response.choices[0].message.content.strip()
     
-    # Sanitize the script content
-    if script_content.startswith("```zsh"):
-        script_content = script_content[6:]
-    if script_content.endswith("```"):
-        script_content = script_content[:-3]
-    script_content = script_content.strip()
+    # Remove introductory text and ```zsh markers
+    script_lines = script_content.split('\n')
+    start_index = next((i for i, line in enumerate(script_lines) if line.strip() == '```zsh'), 0)
+    end_index = next((i for i, line in enumerate(script_lines) if line.strip() == '```'), len(script_lines))
+    
+    script_content = '\n'.join(script_lines[start_index+1:end_index]).strip()
     
     # Create a temporary file with a .sh extension
     with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False, dir='/tmp') as temp_file:
