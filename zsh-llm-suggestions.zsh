@@ -71,6 +71,7 @@ zsh_llm_completion() {
     echo ""
     zle reset-prompt
   elif [[ "$mode" == "script" ]]; then
+    local script_path=$(cat $result_file)
     BUFFER="$script_path"
     CURSOR=${#BUFFER}
     zle reset-prompt
