@@ -45,6 +45,13 @@ def generate_shell_script(client, buffer, os_info):
 
     script_content = response.choices[0].message.content.strip()
     
+    # Sanitize the script content
+    if script_content.startswith("```zsh"):
+        script_content = script_content[6:]
+    if script_content.endswith("```"):
+        script_content = script_content[:-3]
+    script_content = script_content.strip()
+    
     # Create a temporary file with a .sh extension
     with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False, dir='/tmp') as temp_file:
         temp_file.write(script_content)
@@ -53,7 +60,7 @@ def generate_shell_script(client, buffer, os_info):
     # Make the script executable
     os.chmod(temp_file_path, 0o755)
 
-    print(temp_file_path)
+    return temp_file_path
 
 def main():
     mode = sys.argv[1]
