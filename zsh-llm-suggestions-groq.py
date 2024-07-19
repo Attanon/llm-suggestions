@@ -53,7 +53,7 @@ def generate_shell_script(client, buffer, os_info):
     # Make the script executable
     os.chmod(temp_file_path, 0o755)
 
-    return temp_file_path
+    print(temp_file_path)
 
 def main():
     mode = sys.argv[1]
