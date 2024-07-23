@@ -72,11 +72,11 @@ zsh_llm_completion() {
     zle reset-prompt
   elif [[ "$mode" == "script" ]]; then
     local script_path=$(cat $result_file)
-    BUFFER="source $script_path"
+    BUFFER="zsh $script_path"
     CURSOR=${#BUFFER}
     zle reset-prompt
     echo "\nShell script generated and saved to: $script_path"
-    echo "The command to source the script has been added to your prompt."
+    echo "The command to execute script has been added to your prompt."
     echo "Press Enter to execute, or modify as needed."
   fi
 }
