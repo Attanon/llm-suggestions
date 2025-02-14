@@ -34,7 +34,7 @@ def generate_shell_script(client, buffer, os_info):
                          assume the user has appropriate authentication set up and do not include password prompts."""
 
     response = client.chat.completions.create(
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-specdec",
         messages=[
             {"role": "system", "content": system_message},
             {"role": "user", "content": buffer}
@@ -92,7 +92,7 @@ def main():
                              If the command typically requires a password (like mysql), explain how it's assumed to work without explicitly requesting a password."""
 
     response = client.chat.completions.create(
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-specdec",
         messages=[
             {"role": "system", "content": system_message},
             {"role": "user", "content": buffer}
