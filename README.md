@@ -16,7 +16,7 @@ cd ~/.zsh
 
 ### 2. Klonování repozitáře
 ```bash
-git clone https://github.com/your-username/zsh-llm-suggestions.git
+git clone https://gitlab.apertia.cz/dstrejc/zsh-groq-llm.git
 cd zsh-llm-suggestions
 ```
 
