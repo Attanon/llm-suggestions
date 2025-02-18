@@ -5,6 +5,9 @@ import os
 
 MISSING_PREREQUISITES = "zsh-llm-suggestions missing prerequisites:"
 
+# Activate the virtual environment
+venv_loader.activate_venv()
+
 def highlight_explanation(explanation):
   try:
     import pygments

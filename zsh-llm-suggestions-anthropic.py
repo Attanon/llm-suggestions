@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 import sys
 import os
-import anthropic
 
 MISSING_PREREQUISITES = "zsh-llm-suggestions missing prerequisites:"
+
+# Activate the virtual environment
+venv_loader.activate_venv()
+
+import anthropic
 
 def highlight_explanation(explanation):
     try:

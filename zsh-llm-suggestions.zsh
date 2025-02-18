@@ -1,3 +1,4 @@
+#!/bin/zsh
 
 zsh_llm_suggestions_spinner() {
     local pid=$1

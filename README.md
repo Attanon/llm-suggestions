@@ -1,56 +1,91 @@
-# Instalační příručka pro ZSH LLM Suggestions
+# Instalační příručka pro LLM Suggestions
 
 ## Požadavky
-- Nainstalovaný ZSH shell
+- Nainstalovaný ZSH nebo BASH shell
 - Python 3.8 nebo novější
 - pip (Python package manager)
 - Git
 
 ## Instalační kroky
 
-### 1. Vytvoření adresáře pro ZSH pluginy
-```bash
+### 1. Vytvoření adresáře pro pluginy
+#### ZSH ####
+```zsh
 mkdir -p ~/.zsh
 cd ~/.zsh
 ```
 
+#### BASH ####
+```bash
+mkdir -p ~/.bash
+cd ~/.bash
+```
+
 ### 2. Klonování repozitáře
 ```bash
-git clone https://gitlab.apertia.cz/dstrejc/zsh-groq-llm.git
-cd zsh-llm-suggestions
+git clone https://gitlab.kickme.cz/tools/terminal-suggestions.git llm-suggestions
+cd llm-suggestions
 ```
 
 ### 3. Instalace Python závislostí
-```bash
-pip install groq pygments
+```
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt
 ```
 
 ### 4. Nastavení API klíčů
+#### ZSH ####
 Přidejte následující řádky do vašeho `~/.zshrc`:
+```zsh
+export GROQ_API_KEY="váš-groq-api-klíč"
+```
+
+#### BASH ####
+Přidejte následující řádky do vašeho `~/.bashrc`:
 ```bash
 export GROQ_API_KEY="váš-groq-api-klíč"
 ```
 
-### 5. Konfigurace ZSH
+### 5. Konfigurace
 Přidejte následující řádky na konec vašeho `~/.zshrc`:
-```bash
+#### ZSH ####
+```zsh
 # LLM Suggestions
-source ~/.zsh/zsh-llm-suggestions/zsh-llm-suggestions.zsh
+source ~/.zsh/llm-suggestions/zsh-llm-suggestions.zsh
 
 # Klávesové zkratky
 bindkey '^G' zsh_llm_suggestions_groq           # Ctrl+G pro generování příkazů
 bindkey '^X^G' zsh_llm_suggestions_groq_script  # Ctrl+X Ctrl+G pro generování skriptů
 ```
 
-### 6. Aktivace změn
+#### BASH ####
 ```bash
+# LLM Suggestions
+source ~/.bash/llm-suggestions/bash-llm-suggestions.bash
+
+# Klávesové zkratky
+# Klávesové zkratky
+bind -x '"\C-g": bash_llm_suggestions_groq'
+bind -x '"\C-h": bash_llm_suggestions_groq_explain'
+bind -x '"\C-x\C-g": bash_llm_suggestions_groq_script'
+```
+
+### 6. Aktivace změn
+#### ZSH ####
+```zsh
 source ~/.zshrc
+```
+
+#### BASH ####
+```bash
+source ~/.bashrc
 ```
 
 ## Ověření instalace
 1. Otevřete nový terminál
 2. Stiskněte Ctrl+G pro generování příkazů
-3. Stiskněte Ctrl+X Ctrl+G pro generování skriptů
+3. Stiskněte Ctrl+H pro popis příkazů
+4. Stiskněte Ctrl+X Ctrl+G pro generování skriptů
 
 ## Řešení problémů
 
@@ -58,19 +93,18 @@ source ~/.zshrc
 Pokud vidíte chybu o chybějícím API klíči:
 1. Jděte na [Groq Dashboard](https://console.groq.com)
 2. Vytvořte nový API klíč
-3. Zkopírujte ho do vašeho `~/.zshrc`
-
-### Chybějící závislosti
-Pokud vidíte chyby o chybějících Python modulech:
-```bash
-pip install --user groq pygments
-```
+3. Zkopírujte ho do vašeho `~/.zshrc` nebo `~/.bashrc`
 
 ### Oprávnění
 Pokud máte problémy s oprávněními:
+```zsh
+chmod +x ~/.zsh/llm-suggestions/*.py
+chmod +x ~/.zsh/llm-suggestions/*.zsh
+```
+
 ```bash
-chmod +x ~/.zsh/zsh-llm-suggestions/*.py
-chmod +x ~/.zsh/zsh-llm-suggestions/*.zsh
+chmod +x ~/.bash/llm-suggestions/*.py
+chmod +x ~/.bash/llm-suggestions/*.bash
 ```
 
 ## Použití
@@ -89,7 +123,11 @@ chmod +x ~/.zsh/zsh-llm-suggestions/*.zsh
 
 ## Odinstalace
 Pro odstranění rozšíření:
-```bash
-rm -rf ~/.zsh/zsh-llm-suggestions
+```zsh
+rm -rf ~/.zsh/llm-suggestions
 ```
-A odstraňte přidané řádky z vašeho `~/.zshrc`
+
+```bash
+rm -rf ~/.bash/llm-suggestions
+```
+A odstraňte přidané řádky z vašeho `~/.zshrc` nebo `~/.bashrc`

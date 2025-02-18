@@ -1,13 +1,16 @@
-#!/home/honza/.bash/llm-suggestions/bin/python3
+#!/usr/bin/env python3
 import sys
 import os
 import platform
 import tempfile
+import venv_loader  
 
-MISSING_PREREQUISITES = "zsh-llm-suggestions missing prerequisites:"
+MISSING_PREREQUISITES = "llm-suggestions missing prerequisites:"
 
 # Activate the virtual environment
 venv_loader.activate_venv()
+
+import groq
 
 def get_os_info():
     system = platform.system()
