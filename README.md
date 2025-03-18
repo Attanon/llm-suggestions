@@ -25,9 +25,10 @@ Rozšíření pro bash a zsh, které pomocí AI generuje příkazy, vysvětluje 
 - [Groq API klíč](https://console.groq.com) (zdarma)
 
 ### 2. Rychlá instalace
+#### Pro Bash
 ```bash
 # Vytvořit adresář pro rozšíření
-mkdir -p ~/.shell && cd ~/.shell
+mkdir -p ~/.bash && cd ~/.bash
 
 # Stáhnout rozšíření
 git clone https://gitlab.kickme.cz/tools/terminal-suggestions.git llm-suggestions
@@ -38,7 +39,24 @@ python -m venv .venv
 .venv/bin/pip install -r requirements.txt
 
 # Nastavit oprávnění
-chmod +x *.py *.bash *.zsh
+chmod +x *.py *.bash
+```
+
+#### Pro ZSH
+```zsh
+# Vytvořit adresář pro rozšíření
+mkdir -p ~/.zsh && cd ~/.zsh
+
+# Stáhnout rozšíření
+git clone https://gitlab.kickme.cz/tools/terminal-suggestions.git llm-suggestions
+cd llm-suggestions
+
+# Nainstalovat Python závislosti
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt
+
+# Nastavit oprávnění
+chmod +x *.py *.zsh
 ```
 
 ### 3. Konfigurace
@@ -50,7 +68,7 @@ Přidejte do `~/.bashrc`:
 export GROQ_API_KEY="váš-groq-api-klíč"
 
 # Načtení rozšíření
-source ~/.shell/llm-suggestions/bash-llm-suggestions.bash
+source ~/.bash/llm-suggestions/bash-llm-suggestions.bash
 
 # Klávesové zkratky
 bind -x '"\C-g": bash_llm_suggestions_groq'          # Ctrl+G = generování příkazů
@@ -65,23 +83,12 @@ Přidejte do `~/.zshrc`:
 export GROQ_API_KEY="váš-groq-api-klíč"
 
 # Načtení rozšíření
-source ~/.shell/llm-suggestions/zsh-llm-suggestions.zsh
+source ~/.zsh/llm-suggestions/zsh-llm-suggestions.zsh
 
 # Klávesové zkratky
 bindkey '^G' zsh_llm_suggestions_groq          # Ctrl+G = generování příkazů
 bindkey '^H' zsh_llm_suggestions_groq_explain  # Ctrl+H = vysvětlení příkazů
 bindkey '^X^G' zsh_llm_suggestions_groq_script # Ctrl+X Ctrl+G = generování skriptů
-```
-
-### 4. Aktivace
-Pro Bash:
-```bash
-source ~/.bashrc
-```
-
-Pro ZSH:
-```zsh
-source ~/.zshrc
 ```
 
 ## Použití
@@ -112,32 +119,40 @@ source ~/.zshrc
 
 ### Debug mód
 Pro zobrazení komunikace s AI:
-```bash
+```sh
 export LLM_SUGGESTIONS_DEBUG=1
 ```
 
 ## Odinstalace
+
+#### Pro Bash
 ```bash
 # Smazat rozšíření
-rm -rf ~/.shell/llm-suggestions
+rm -rf ~/.bash/llm-suggestions
 
 # Odstranit konfiguraci z ~/.bashrc:
 # - GROQ_API_KEY
-# - source ~/.shell/llm-suggestions/bash-llm-suggestions.bash
+# - source ~/.bash/llm-suggestions/bash-llm-suggestions.bash
 # - bind příkazy
 
 # Odstranit konfiguraci z ~/.zshrc:
 # - GROQ_API_KEY
-# - source ~/.shell/llm-suggestions/zsh-llm-suggestions.zsh
+# - source ~/.bash/llm-suggestions/zsh-llm-suggestions.zsh
 # - bindkey příkazy
 ```
 
-## Changelog
+#### Pro ZSH
+```zsh
+# Smazat rozšíření
+rm -rf ~/.zsh/llm-suggestions
 
-### v1.1.0 (2024-03-21)
-- ✨ Přidána podpora pro ZSH shell
-- 🔧 Vylepšený kontext s informacemi o OS
-- 📝 Aktualizovaná dokumentace pro oba shelly
-- 🎨 Lepší detekce aliasů a funkcí
+# Odstranit konfiguraci z ~/.bashrc:
+# - GROQ_API_KEY
+# - source ~/.bash/llm-suggestions/bash-llm-suggestions.bash
+# - bind příkazy
 
-[předchozí changelog zůstává stejný...]
+# Odstranit konfiguraci z ~/.zshrc:
+# - GROQ_API_KEY
+# - source ~/.bash/llm-suggestions/zsh-llm-suggestions.zsh
+# - bindkey příkazy
+```
