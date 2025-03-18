@@ -1,133 +1,143 @@
-# Instalační příručka pro LLM Suggestions
+# LLM Suggestions pro Bash a ZSH
 
-## Požadavky
-- Nainstalovaný ZSH nebo BASH shell
-- Python 3.8 nebo novější
-- pip (Python package manager)
+Rozšíření pro bash a zsh, které pomocí AI generuje příkazy, vysvětluje jejich funkci a vytváří skripty na základě vašeho popisu v přirozeném jazyce.
+
+## Co umí?
+
+1. **Generování příkazů** (Ctrl+G)
+   - Napíšete "vytvoř složku projekty a přejdi do ní"
+   - Dostanete `mkdir projekty && cd projekty`
+
+2. **Vysvětlení příkazů** (Ctrl+H)
+   - Napíšete složitý příkaz
+   - Dostanete srozumitelné vysvětlení, co dělá
+
+3. **Generování skriptů** (Ctrl+X Ctrl+G)
+   - Popíšete, co potřebujete automatizovat
+   - Dostanete hotový bash skript
+
+## Instalace
+
+### 1. Předpoklady
+- Bash nebo ZSH shell
+- Python 3.8+
 - Git
+- [Groq API klíč](https://console.groq.com) (zdarma)
 
-## Instalační kroky
-
-### 1. Vytvoření adresáře pro pluginy
-#### ZSH ####
-```zsh
-mkdir -p ~/.zsh
-cd ~/.zsh
-```
-
-#### BASH ####
+### 2. Rychlá instalace
 ```bash
-mkdir -p ~/.bash
-cd ~/.bash
-```
+# Vytvořit adresář pro rozšíření
+mkdir -p ~/.shell && cd ~/.shell
 
-### 2. Klonování repozitáře
-```bash
+# Stáhnout rozšíření
 git clone https://gitlab.kickme.cz/tools/terminal-suggestions.git llm-suggestions
 cd llm-suggestions
-```
 
-### 3. Instalace Python závislostí
-```
+# Nainstalovat Python závislosti
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt
+
+# Nastavit oprávnění
+chmod +x *.py *.bash *.zsh
 ```
 
-### 4. Nastavení API klíčů
-#### ZSH ####
-Přidejte následující řádky do vašeho `~/.zshrc`:
-```zsh
-export GROQ_API_KEY="váš-groq-api-klíč"
-```
+### 3. Konfigurace
 
-#### BASH ####
-Přidejte následující řádky do vašeho `~/.bashrc`:
+#### Pro Bash
+Přidejte do `~/.bashrc`:
 ```bash
+# API klíč z Groq
 export GROQ_API_KEY="váš-groq-api-klíč"
+
+# Načtení rozšíření
+source ~/.shell/llm-suggestions/bash-llm-suggestions.bash
+
+# Klávesové zkratky
+bind -x '"\C-g": bash_llm_suggestions_groq'          # Ctrl+G = generování příkazů
+bind -x '"\C-h": bash_llm_suggestions_groq_explain'  # Ctrl+H = vysvětlení příkazů
+bind -x '"\C-x\C-g": bash_llm_suggestions_groq_script'  # Ctrl+X Ctrl+G = generování skriptů
 ```
 
-### 5. Konfigurace
-Přidejte následující řádky na konec vašeho `~/.zshrc`:
-#### ZSH ####
+#### Pro ZSH
+Přidejte do `~/.zshrc`:
 ```zsh
-# LLM Suggestions
-source ~/.zsh/llm-suggestions/zsh-llm-suggestions.zsh
+# API klíč z Groq
+export GROQ_API_KEY="váš-groq-api-klíč"
+
+# Načtení rozšíření
+source ~/.shell/llm-suggestions/zsh-llm-suggestions.zsh
 
 # Klávesové zkratky
-bindkey '^G' zsh_llm_suggestions_groq           # Ctrl+G pro generování příkazů
-bindkey '^X^G' zsh_llm_suggestions_groq_script  # Ctrl+X Ctrl+G pro generování skriptů
+bindkey '^G' zsh_llm_suggestions_groq          # Ctrl+G = generování příkazů
+bindkey '^H' zsh_llm_suggestions_groq_explain  # Ctrl+H = vysvětlení příkazů
+bindkey '^X^G' zsh_llm_suggestions_groq_script # Ctrl+X Ctrl+G = generování skriptů
 ```
 
-#### BASH ####
-```bash
-# LLM Suggestions
-source ~/.bash/llm-suggestions/bash-llm-suggestions.bash
-
-# Klávesové zkratky
-# Klávesové zkratky
-bind -x '"\C-g": bash_llm_suggestions_groq'
-bind -x '"\C-h": bash_llm_suggestions_groq_explain'
-bind -x '"\C-x\C-g": bash_llm_suggestions_groq_script'
-```
-
-### 6. Aktivace změn
-#### ZSH ####
-```zsh
-source ~/.zshrc
-```
-
-#### BASH ####
+### 4. Aktivace
+Pro Bash:
 ```bash
 source ~/.bashrc
 ```
 
-## Ověření instalace
-1. Otevřete nový terminál
-2. Stiskněte Ctrl+G pro generování příkazů
-3. Stiskněte Ctrl+H pro popis příkazů
-4. Stiskněte Ctrl+X Ctrl+G pro generování skriptů
-
-## Řešení problémů
-
-### Chybějící API klíč
-Pokud vidíte chybu o chybějícím API klíči:
-1. Jděte na [Groq Dashboard](https://console.groq.com)
-2. Vytvořte nový API klíč
-3. Zkopírujte ho do vašeho `~/.zshrc` nebo `~/.bashrc`
-
-### Oprávnění
-Pokud máte problémy s oprávněními:
+Pro ZSH:
 ```zsh
-chmod +x ~/.zsh/llm-suggestions/*.py
-chmod +x ~/.zsh/llm-suggestions/*.zsh
-```
-
-```bash
-chmod +x ~/.bash/llm-suggestions/*.py
-chmod +x ~/.bash/llm-suggestions/*.bash
+source ~/.zshrc
 ```
 
 ## Použití
 
 ### Generování příkazů
-1. Napište popis požadovaného příkazu do terminálu
-2. Stiskněte Ctrl+G
+1. Napište popis v přirozeném jazyce (např. "najdi všechny pdf soubory")
+2. Stiskněte **Ctrl+G**
 3. Počkejte na vygenerování příkazu
-4. Stiskněte Enter pro spuštění nebo upravte příkaz dle potřeby
+4. Upravte příkaz podle potřeby nebo rovnou spusťte pomocí Enter
+
+### Vysvětlení příkazů
+1. Napište nebo vložte příkaz
+2. Stiskněte **Ctrl+H**
+3. Zobrazí se srozumitelné vysvětlení
 
 ### Generování skriptů
-1. Napište popis požadovaného skriptu
-2. Stiskněte Ctrl+X Ctrl+G
-3. Skript bude vygenerován a uložen do /tmp
-4. Příkaz pro spuštění skriptu bude automaticky vložen do promptu
+1. Popište, co má skript dělat
+2. Stiskněte **Ctrl+X Ctrl+G**
+3. Skript se uloží do `/tmp`
+4. Do promptu se vloží příkaz pro spuštění skriptu
+
+## Řešení problémů
+
+### Chybí API klíč?
+1. Jděte na [Groq Dashboard](https://console.groq.com)
+2. Vytvořte nový API klíč
+3. Vložte ho do `~/.bashrc` jako `export GROQ_API_KEY="váš-klíč"`
+
+### Debug mód
+Pro zobrazení komunikace s AI:
+```bash
+export LLM_SUGGESTIONS_DEBUG=1
+```
 
 ## Odinstalace
-Pro odstranění rozšíření:
-```zsh
-rm -rf ~/.zsh/llm-suggestions
+```bash
+# Smazat rozšíření
+rm -rf ~/.shell/llm-suggestions
+
+# Odstranit konfiguraci z ~/.bashrc:
+# - GROQ_API_KEY
+# - source ~/.shell/llm-suggestions/bash-llm-suggestions.bash
+# - bind příkazy
+
+# Odstranit konfiguraci z ~/.zshrc:
+# - GROQ_API_KEY
+# - source ~/.shell/llm-suggestions/zsh-llm-suggestions.zsh
+# - bindkey příkazy
 ```
 
-```bash
-rm -rf ~/.bash/llm-suggestions
-```
-A odstraňte přidané řádky z vašeho `~/.zshrc` nebo `~/.bashrc`
+## Changelog
+
+### v1.1.0 (2024-03-21)
+- ✨ Přidána podpora pro ZSH shell
+- 🔧 Vylepšený kontext s informacemi o OS
+- 📝 Aktualizovaná dokumentace pro oba shelly
+- 🎨 Lepší detekce aliasů a funkcí
+
+[předchozí changelog zůstává stejný...]
