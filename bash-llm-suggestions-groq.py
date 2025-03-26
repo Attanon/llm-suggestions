@@ -196,14 +196,14 @@ def generate_shell_script(client, buffer, os_info, shell_context):
     ]
     
     debug_print("Request to LLM", {
-        "model": "mixtral-8x7b-32768",
+        "model": "llama-3.3-70b-versatile",
         "messages": messages,
         "max_tokens": 2000,
         "temperature": 0.2
     })
 
     response = client.chat.completions.create(
-        model="mixtral-8x7b-32768",
+        model="llama-3.3-70b-versatile",
         messages=messages,
         max_tokens=2000,
         temperature=0.2
@@ -301,14 +301,14 @@ def main():
     ]
 
     debug_print("Request to LLM", {
-        "model": "mixtral-8x7b-32768",
+        "model": "llama-3.3-70b-versatile",
         "messages": messages,
         "max_tokens": 1000,
         "temperature": 0.2
     })
 
     response = client.chat.completions.create(
-        model="mixtral-8x7b-32768",
+        model="llama-3.3-70b-versatile",
         messages=messages,
         max_tokens=1000,
         temperature=0.2
