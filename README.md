@@ -22,7 +22,9 @@ Rozšíření pro bash a zsh, které pomocí AI generuje příkazy, vysvětluje 
 - Bash nebo ZSH shell
 - Python 3.8+
 - Git
-- [Groq API klíč](https://console.groq.com) (zdarma)
+- **Jedna z možností:**
+  - [Groq API klíč](https://console.groq.com) (zdarma) - výchozí možnost
+  - [Claude Code CLI](https://claude.ai/code) - alternativní AI provider
 
 ### 2. Rychlá instalace
 #### Pro Bash
@@ -61,11 +63,27 @@ chmod +x *.py *.zsh
 
 ### 3. Konfigurace
 
+#### Konfigurace AI Provideru
+Vyberte si jednu z možností:
+
+##### Možnost A: Groq (výchozí, zdarma)
+```bash
+export GROQ_API_KEY="váš-groq-api-klíč"
+# LLM_PROVIDER není nutné nastavit, "groq" je výchozí
+```
+
+##### Možnost B: Claude Code CLI
+```bash
+export LLM_PROVIDER="claude"
+# Claude Code CLI musí být nainstalované a autentifikované
+```
+
 #### Pro Bash
 Přidejte do `~/.bashrc`:
 ```bash
-# API klíč z Groq
-export GROQ_API_KEY="váš-groq-api-klíč"
+# Konfigurace AI provideru (vyberte jednu možnost výše)
+export GROQ_API_KEY="váš-groq-api-klíč"  # nebo
+export LLM_PROVIDER="claude"
 
 # Načtení rozšíření
 source ~/.bash/llm-suggestions/bash-llm-suggestions.bash
@@ -79,8 +97,9 @@ bind -x '"\C-x\C-g": bash_llm_suggestions_groq_script'  # Ctrl+X Ctrl+G = genero
 #### Pro ZSH
 Přidejte do `~/.zshrc`:
 ```zsh
-# API klíč z Groq
-export GROQ_API_KEY="váš-groq-api-klíč"
+# Konfigurace AI provideru (vyberte jednu možnost výše)
+export GROQ_API_KEY="váš-groq-api-klíč"  # nebo
+export LLM_PROVIDER="claude"
 
 # Načtení rozšíření
 source ~/.zsh/llm-suggestions/zsh-llm-suggestions.zsh
@@ -112,15 +131,28 @@ bindkey '^X^G' zsh_llm_suggestions_groq_script # Ctrl+X Ctrl+G = generování sk
 
 ## Řešení problémů
 
-### Chybí API klíč?
+### Chybí API klíč nebo provider?
+
+#### Pro Groq provider:
 1. Jděte na [Groq Dashboard](https://console.groq.com)
 2. Vytvořte nový API klíč
 3. Vložte ho do `~/.bashrc` jako `export GROQ_API_KEY="váš-klíč"`
 
+#### Pro Claude provider:
+1. Nainstalujte Claude Code CLI: [claude.ai/code](https://claude.ai/code)
+2. Autentifikujte se pomocí `claude auth`
+3. Nastavte `export LLM_PROVIDER="claude"`
+
 ### Debug mód
-Pro zobrazení komunikace s AI:
+Pro zobrazení komunikace s AI (funguje pro oba providery):
 ```sh
 export LLM_SUGGESTIONS_DEBUG=1
+```
+
+### Změna provideru
+```sh
+export LLM_PROVIDER="groq"    # použije Groq API
+export LLM_PROVIDER="claude"  # použije Claude Code CLI
 ```
 
 ## Odinstalace

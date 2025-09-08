@@ -6,6 +6,7 @@ import tempfile
 import subprocess
 import venv_loader
 import json
+from abc import ABC, abstractmethod
 
 MISSING_PREREQUISITES = "llm-suggestions missing prerequisites:"
 
@@ -37,6 +38,10 @@ def get_os_info():
         return "Unknown"
 
 def get_shell_context():
+    provider_type = os.environ.get('LLM_PROVIDER', 'groq').lower()
+    if provider_type == 'claude':
+        return ''
+
     """Get only user-defined bash aliases and functions from .bashrc and included files"""
     try:
         # Create a temporary script to extract user definitions and directory info
@@ -174,87 +179,49 @@ def highlight_explanation(explanation):
     except ImportError:
         return explanation
 
-def generate_shell_script(client, buffer, os_info, shell_context):
-    system_message = f"""You are a bash shell expert on {os_info}. Write a complete shell script that solves the given problem.
-                         The script should be fully functional and ready to run. Include appropriate shebang, comments, and error handling.
-                         Ensure the script is compatible with {os_info}.
-                         
-                         IMPORTANT - CONTEXT:
-                         {shell_context}
-                         
-                         RULES:
-                         1. ALWAYS prefer using available aliases and functions listed above when applicable
-                         2. Do not reinvent functionality that's already available through aliases or functions
-                         3. If using an alias or function, add a comment explaining why it was chosen
-                         
-                         If the script typically requires a password (like mysql),
-                         assume the user has appropriate authentication set up and do not include password prompts."""
-
-    messages = [
-        {"role": "system", "content": system_message},
-        {"role": "user", "content": buffer}
-    ]
+class LLMProvider(ABC):
+    @abstractmethod
+    def generate_command(self, buffer, os_info, shell_context):
+        pass
     
-    debug_print("Request to LLM", {
-        "model": "llama-3.3-70b-versatile",
-        "messages": messages,
-        "max_tokens": 2000,
-        "temperature": 0.2
-    })
-
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
-        max_tokens=2000,
-        temperature=0.2
-    )
-
-    debug_print("Response from LLM", response.choices[0].message.content)
-
-    script_content = response.choices[0].message.content.strip()
+    @abstractmethod
+    def explain_command(self, buffer, os_info, shell_context):
+        pass
     
-    # Remove introductory text and ```zsh markers
-    script_lines = script_content.split('\n')
-    start_index = next((i for i, line in enumerate(script_lines) if line.strip() == '```bash'), 0)
-    end_index = next((i for i, line in enumerate(script_lines) if line.strip() == '```'), len(script_lines))
+    @abstractmethod
+    def generate_script(self, buffer, os_info, shell_context):
+        pass
+
+class GroqProvider(LLMProvider):
+    def __init__(self, api_key):
+        self.client = groq.Groq(api_key=api_key)
     
-    script_content = '\n'.join(script_lines[start_index+1:end_index]).strip()
+    def _create_messages(self, system_message, buffer):
+        return [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": buffer}
+        ]
     
-    # Create a temporary file with a .sh extension
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False, dir='/tmp') as temp_file:
-        temp_file.write(script_content)
-        temp_file_path = temp_file.name
+    def _make_request(self, messages, max_tokens):
+        debug_print("Request to LLM", {
+            "model": "llama-3.3-70b-versatile",
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": 0.2
+        })
 
-    # Make the script executable
-    os.chmod(temp_file_path, 0o755)
+        response = self.client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=0.2
+        )
 
-    return temp_file_path
-
-def main():
-    mode = sys.argv[1]
-    if mode not in ['generate', 'explain', 'script']:
-        print(f"ERROR: something went wrong in bash-llm-suggestions, please report a bug. Got unknown mode: {mode}")
-        return
-
-    api_key = os.environ.get('GROQ_API_KEY')
-    if api_key is None:
-        print(f'echo "{MISSING_PREREQUISITES} GROQ_API_KEY is not set." && export GROQ_API_KEY="<copy from Groq dashboard>"')
-        return
-
-    client = groq.Groq(api_key=api_key)
-
-    buffer = sys.stdin.read()
-    debug_print("Input buffer", buffer)
+        debug_print("Response from LLM", response.choices[0].message.content)
+        return response.choices[0].message.content.strip()
     
-    os_info = get_os_info()
-    shell_context = get_shell_context()
-    
-    if mode == 'script':
-        script_path = generate_shell_script(client, buffer, os_info, shell_context)
-        print(script_path)
-        return
-
-    system_message = f"""You are a bash shell expert on {os_info}. Your task is to write a BASH command that solves the problem.
+    def generate_command(self, buffer, os_info, shell_context):
+        system_message = f"""You are a bash shell expert on {os_info}. Your task is to write a BASH command that solves the problem.
                          
                          IMPORTANT - CONTEXT AND RULES:
                          {shell_context}
@@ -281,7 +248,17 @@ def main():
                          
                          ONLY use aliases/functions when they are DIRECTLY related to the requested task."""
 
-    if mode == 'explain':
+        messages = self._create_messages(system_message, buffer)
+        result = self._make_request(messages, 1000)
+        
+        result = result.replace('```bash', '').replace('```', '').strip()
+        result = result.split('\n')[0].strip()
+        result = result.strip('"').strip("'").strip('`')
+        result = result.replace('Command: ', '').replace('$ ', '').strip()
+        
+        return result
+    
+    def explain_command(self, buffer, os_info, shell_context):
         system_message = f"""You are a bash shell expert on {os_info}. Explain how the given command works.
                              
                              IMPORTANT - CONTEXT:
@@ -295,40 +272,205 @@ def main():
                              
                              If the command typically requires a password (like mysql), explain how it's assumed to work without explicitly requesting a password."""
 
-    messages = [
-        {"role": "system", "content": system_message},
-        {"role": "user", "content": buffer}
-    ]
+        messages = self._create_messages(system_message, buffer)
+        return self._make_request(messages, 1000)
+    
+    def generate_script(self, buffer, os_info, shell_context):
+        system_message = f"""You are a bash shell expert on {os_info}. Write a complete shell script that solves the given problem.
+                         The script should be fully functional and ready to run. Include appropriate shebang, comments, and error handling.
+                         Ensure the script is compatible with {os_info}.
+                         
+                         IMPORTANT - CONTEXT:
+                         {shell_context}
+                         
+                         RULES:
+                         1. ALWAYS prefer using available aliases and functions listed above when applicable
+                         2. Do not reinvent functionality that's already available through aliases or functions
+                         3. If using an alias or function, add a comment explaining why it was chosen
+                         
+                         If the script typically requires a password (like mysql),
+                         assume the user has appropriate authentication set up and do not include password prompts."""
 
-    debug_print("Request to LLM", {
-        "model": "llama-3.3-70b-versatile",
-        "messages": messages,
-        "max_tokens": 1000,
-        "temperature": 0.2
-    })
+        messages = self._create_messages(system_message, buffer)
+        result = self._make_request(messages, 2000)
+        
+        script_lines = result.split('\n')
+        start_index = next((i for i, line in enumerate(script_lines) if line.strip() == '```bash'), 0)
+        end_index = next((i for i, line in enumerate(script_lines) if line.strip() == '```'), len(script_lines))
+        
+        return '\n'.join(script_lines[start_index+1:end_index]).strip()
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
-        max_tokens=1000,
-        temperature=0.2
-    )
+class ClaudeProvider(LLMProvider):
+    def __init__(self):
+        if not self._check_claude_cli():
+            raise RuntimeError("Claude CLI not found. Please install Claude Code.")
+    
+    def _check_claude_cli(self):
+        try:
+            subprocess.run(['claude', '--help'], capture_output=True, check=True)
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
+    
+    def _run_claude(self, buffer, system_prompt):
+        try:
+            cmd = ['claude', '-p', '--append-system-prompt', system_prompt]
+            
+            debug_print("Claude CLI Command", {
+                "command": cmd,
+                "input": buffer
+            })
+            
+            result = subprocess.run(
+                cmd,
+                input=buffer,
+                text=True,
+                capture_output=True,
+                timeout=60
+            )
+            
+            if result.returncode != 0:
+                debug_print("Claude CLI Error", {
+                    "returncode": result.returncode,
+                    "stderr": result.stderr
+                })
+                return f"Error calling Claude CLI: {result.stderr}"
+            
+            debug_print("Claude CLI Response", result.stdout)
+            return result.stdout.strip()
+            
+        except subprocess.TimeoutExpired:
+            return "Error: Claude CLI timeout"
+        except Exception as e:
+            return f"Error calling Claude CLI: {str(e)}"
+    
+    def generate_command(self, buffer, os_info, shell_context):
+        system_prompt = f"""You are a bash shell expert on {os_info}. Your task is to write a BASH command that solves the problem.
+                         
+                         RULES:
+                         
+                         1. Use available aliases and functions ONLY when they EXACTLY match the requested operation
+                         2. Do not force using aliases/functions if they don't precisely fit the task
+                         3. Only output the raw command without any formatting or quotes
+                         4. Output exactly ONE command that does exactly what was asked
+                         5. DO NOT add any explanations or additional text
+                         
+                         Examples of CORRECT alias/function usage:
+                         User: "clear cache"
+                         If 'rmcache' alias exists and is meant for cache clearing -> use: rmcache
+                         
+                         User: "list all docker containers"
+                         If 'dps' alias exists for 'docker ps -a' -> use: dps
+                         
+                         Examples of INCORRECT alias/function usage:
+                         User: "show disk space"
+                         Even if 'rmcache' exists, DO NOT use it as it's unrelated
+                         
+                         User: "create new file"
+                         Even if 'update' exists, DO NOT use it as it's unrelated
+                         
+                         ONLY use aliases/functions when they are DIRECTLY related to the requested task."""
 
-    debug_print("Response from LLM", response.choices[0].message.content)
-
-    result = response.choices[0].message.content.strip()
-
-    if mode == 'generate':
-        result = response.choices[0].message.content.strip()
-        # Remove any markdown formatting
+        result = self._run_claude(buffer, system_prompt)
+        
+        # Clean up Claude's response - handle various formats
         result = result.replace('```bash', '').replace('```', '').strip()
-        # Remove quotes and any explanatory text
-        result = result.split('\n')[0].strip()  # Take only first line
-        result = result.strip('"').strip("'").strip('`')  # Remove any quotes or backticks
-        # Remove any common prefixes that the model might add
+        result = result.split('\n')[0].strip()
+        
+        # Remove surrounding quotes and backticks - be more thorough
+        result = result.strip()
+        while result.startswith(('`', '"', "'")):
+            result = result[1:]
+        while result.endswith(('`', '"', "'")):
+            result = result[:-1]
+        
         result = result.replace('Command: ', '').replace('$ ', '').strip()
+        
+        return result
+    
+    def explain_command(self, buffer, os_info, shell_context):
+        system_prompt = f"""You are a bash shell expert on {os_info}. Explain how the given command works.                             
+                             RULES FOR EXPLANATION:
+                             1. Be concise and use Markdown syntax
+                             2. If the command uses any available aliases or functions, explain them FIRST
+                             3. Highlight any {os_info}-specific considerations
+                             4. If command uses built-in commands instead of available aliases/functions, mention that
+                             
+                             If the command typically requires a password (like mysql), explain how it's assumed to work without explicitly requesting a password."""
+
+        return self._run_claude("Please explain this command <commad>" + buffer + "</command>", system_prompt)
+    
+    def generate_script(self, buffer, os_info, shell_context):
+        system_prompt = f"""You are a bash shell expert on {os_info}. Write a complete shell script that solves the given problem.
+                         The script should be fully functional and ready to run. Include appropriate shebang, comments, and error handling.
+                         Ensure the script is compatible with {os_info}.
+                                                  
+                         RULES:
+                         1. ALWAYS prefer using available aliases and functions listed above when applicable
+                         2. Do not reinvent functionality that's already available through aliases or functions
+                         3. If using an alias or function, add a comment explaining why it was chosen
+                         
+                         If the script typically requires a password (like mysql),
+                         assume the user has appropriate authentication set up and do not include password prompts."""
+
+        result = self._run_claude(buffer, system_prompt)
+        
+        script_lines = result.split('\n')
+        start_index = next((i for i, line in enumerate(script_lines) if line.strip() == '```bash'), 0)
+        end_index = next((i for i, line in enumerate(script_lines) if line.strip() == '```'), len(script_lines))
+        
+        return '\n'.join(script_lines[start_index+1:end_index]).strip()
+
+def create_provider():
+    provider_type = os.environ.get('LLM_PROVIDER', 'groq').lower()
+    
+    if provider_type == 'groq':
+        api_key = os.environ.get('GROQ_API_KEY')
+        if api_key is None:
+            print(f'echo "{MISSING_PREREQUISITES} GROQ_API_KEY is not set." && export GROQ_API_KEY="<copy from Groq dashboard>"')
+            sys.exit(1)
+        return GroqProvider(api_key)
+    
+    elif provider_type == 'claude':
+        try:
+            return ClaudeProvider()
+        except RuntimeError as e:
+            print(f'echo "{MISSING_PREREQUISITES} {str(e)}"')
+            sys.exit(1)
+    
+    else:
+        print(f'echo "{MISSING_PREREQUISITES} Unknown LLM_PROVIDER: {provider_type}. Use \'groq\' or \'claude\'."')
+        sys.exit(1)
+
+
+def main():
+    mode = sys.argv[1]
+    if mode not in ['generate', 'explain', 'script']:
+        print(f"ERROR: something went wrong in bash-llm-suggestions, please report a bug. Got unknown mode: {mode}")
+        return
+
+    provider = create_provider()
+    buffer = sys.stdin.read()
+    debug_print("Input buffer", buffer)
+    
+    os_info = get_os_info()
+    shell_context = get_shell_context()
+    
+    if mode == 'script':
+        script_content = provider.generate_script(buffer, os_info, shell_context)
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False, dir='/tmp') as temp_file:
+            temp_file.write(script_content)
+            temp_file_path = temp_file.name
+        
+        os.chmod(temp_file_path, 0o755)
+        print(temp_file_path)
+        
+    elif mode == 'generate':
+        result = provider.generate_command(buffer, os_info, shell_context)
         print(result)
-    if mode == 'explain':
+        
+    elif mode == 'explain':
+        result = provider.explain_command(buffer, os_info, shell_context)
         print(highlight_explanation(result))
 
 if __name__ == '__main__':

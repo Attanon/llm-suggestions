@@ -4,7 +4,7 @@ import os
 def activate_venv():
     """Dynamically adds the virtual environment's site-packages to sys.path."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    venv_path = os.path.join(script_dir, ".venv")
+    venv_path = os.path.join(script_dir, "venv")
 
     # Determine the correct site-packages path
     if os.name == "nt":  # Windows
